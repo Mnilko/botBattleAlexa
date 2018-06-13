@@ -1,39 +1,88 @@
 {
-    "interactionModel":{
-        "languageModel":{
-            "invocationName":"bot battle",
-            "types":[],
-            "intents":[
-                {
+  "interactionModel": {
+      "languageModel": {
+          "invocationName": "bot battle",
+          "intents": [
+              {
                   "name": "AMAZON.CancelIntent",
                   "samples": []
-                },
-                {
+              },
+              {
                   "name": "AMAZON.HelpIntent",
                   "samples": []
-                },
-                {
+              },
+              {
                   "name": "AMAZON.StopIntent",
                   "samples": []
-                },
-                {
-                    "name":"HelloWorldIntent",
-                    "slots":[
-
-                    ],
-                    "samples":[
-                        "hello",
-                        "say hello",
-                        "say hello world"
-                    ]
-                },
-                {
+              },
+              {
                   "name": "StartGameIntent",
+                  "slots": [],
                   "samples": [
-                    "start game tic tac toe"
+                      "start game tic tac toe",
+                      "start a game"
                   ]
-                }
-            ]
-        }
-    }
+              },
+              {
+                  "name": "TurnIntent",
+                  "slots": [
+                      {
+                          "name": "turnNumber",
+                          "type": "AMAZON.NUMBER"
+                      },
+                      {
+                          "name": "turnLetter",
+                          "type": "turnLetter"
+                      }
+                  ],
+                  "samples": [
+                      "my turn is {turnLetter} {turnNumber}"
+                  ]
+              }
+          ],
+          "types": [
+              {
+                  "name": "turnLetter",
+                  "values": [
+                      {
+                          "id": "d",
+                          "name": {
+                              "value": "d",
+                              "synonyms": [
+                                  "delta"
+                              ]
+                          }
+                      },
+                      {
+                          "id": "c",
+                          "name": {
+                              "value": "c",
+                              "synonyms": [
+                                  "charlie"
+                              ]
+                          }
+                      },
+                      {
+                          "id": "b",
+                          "name": {
+                              "value": "b",
+                              "synonyms": [
+                                  "bravo"
+                              ]
+                          }
+                      },
+                      {
+                          "id": "a",
+                          "name": {
+                              "value": "a",
+                              "synonyms": [
+                                  "alpha"
+                              ]
+                          }
+                      }
+                  ]
+              }
+          ]
+      }
+  }
 }

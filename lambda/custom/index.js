@@ -5,31 +5,16 @@ const Alexa = require('ask-sdk-core');
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
-    console.log('Requested Intent', handlerInput.requestEnvelope.request.intent);
+    console.log('Requested Intent', JSON.stringify(handlerInput.requestEnvelope.request.intent));
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
-    const speechText = 'Welcome to the Alexa Skills Kit, you can say hello!';
+    const speechText = 'Welcome to the Bot Battle Skill. You can start by saying: "Start a Game"';
 
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt(speechText)
-      .withSimpleCard('Hello World', speechText)
-      .getResponse();
-  },
-};
-
-const HelloWorldIntentHandler = {
-  canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'HelloWorldIntent';
-  },
-  handle(handlerInput) {
-    const speechText = 'Hello World from Bot Battle!';
-
-    return handlerInput.responseBuilder
-      .speak(speechText)
-      .withSimpleCard('Hello World from Bot Battle!', speechText)
+      .withSimpleCard('Welcome to Bot Battle', speechText)
       .getResponse();
   },
 };
@@ -40,13 +25,42 @@ const StartGameIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'StartGameIntent';
   },
   handle(handlerInput) {
-    const speechText = 'Ok, Google. My turn is A5';
+    // send request to AI with empty board
+    // save board status in session params
+    // find the turn and create response
+    const speechText = 'Ok, Google. My turn is Alpha 3';
 
     return handlerInput.responseBuilder
       .speak(speechText)
       .withSimpleCard('Hello World from Bot Battle!', speechText)
+      .withShouldEndSession(false)
       .getResponse();
-  }
+  },
+};
+
+const TurnIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'TurnIntent';
+  },
+  handle(handlerInput) {
+    console.log('Slots', JSON.stringify(handlerInput.requestEnvelope.request.intent.slots));
+    const turnNumber = handlerInput.requestEnvelope.request.intent.slots.turnNumber.value;
+    const turnLetter = handlerInput.requestEnvelope.request.intent.slots.turnLetter.value;
+    // add turn on board
+    // send request to AI with current board
+    // check if win
+    // find the turn and crete response
+
+    const speechText = `Your turn is ${turnLetter}${turnNumber}`;
+
+
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .withSimpleCard(speechText, speechText)
+      .withShouldEndSession(false)
+      .getResponse();
+  },
 };
 
 const HelpIntentHandler = {
@@ -112,10 +126,10 @@ exports.handler = skillBuilder
   .addRequestHandlers(
     LaunchRequestHandler,
     StartGameIntentHandler,
-    HelloWorldIntentHandler,
+    TurnIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
-    SessionEndedRequestHandler
+    SessionEndedRequestHandler,
   )
   .addErrorHandlers(ErrorHandler)
   .lambda();
