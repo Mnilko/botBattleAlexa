@@ -2,10 +2,22 @@
 /* eslint-disable  no-console */
 
 const Alexa = require('ask-sdk-core');
+const axios = require('axios');
+
+const AIUrl = 'https://h282dtqxfc.execute-api.us-east-1.amazonaws.com/dev/tictactoe';
+
+const LETTER_NAMES = {
+  a: 'alpha',
+  b: 'bravo',
+  c: 'charlie',
+  d: 'delta',
+};
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
-    console.log('Requested Intent', JSON.stringify(handlerInput.requestEnvelope.request.intent));
+    console.log('LaunchRequest');
+    const attributes = handlerInput.attributesManager.getSessionAttributes();
+    console.log('Attributes', attributes);
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
@@ -24,11 +36,24 @@ const StartGameIntentHandler = {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
       && handlerInput.requestEnvelope.request.intent.name === 'StartGameIntent';
   },
-  handle(handlerInput) {
-    // send request to AI with empty board
-    // save board status in session params
-    // find the turn and create response
-    const speechText = 'Ok, Google. My turn is Alpha 3';
+  async handle(handlerInput) {
+    const response = await axios({
+      method: 'post',
+      url: AIUrl,
+      data: {
+        board: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        coordinate: '',
+      },
+    });
+
+    const {
+      board, newTurnCoordinate, winStatus, isFault
+    } = response.data;
+
+    console.log(`Board: ${board}, coordinates: ${newTurnCoordinate}, winStatus: ${winStatus}, isFault: ${isFault}`);
+    handlerInput.attributesManager.setSessionAttributes({ board, symbol: 'X' });
+
+    const speechText = `Ok, Google. My turn is ${LETTER_NAMES[newTurnCoordinate[0]]} ${newTurnCoordinate[1]}`;
 
     return handlerInput.responseBuilder
       .speak(speechText)
