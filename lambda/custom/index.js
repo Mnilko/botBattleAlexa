@@ -1,4 +1,4 @@
-// /* eslint-disable  func-names */
+/* eslint-disable  func-names */
 /* eslint-disable  no-console */
 
 const Alexa = require('ask-sdk-core');
@@ -6,18 +6,22 @@ const axios = require('axios');
 
 const AIUrl = 'https://h282dtqxfc.execute-api.us-east-1.amazonaws.com/dev/tictactoe';
 
-const LETTER_NAMES = {
-  a: 'alpha',
-  b: 'bravo',
-  c: 'charlie',
-  d: 'delta',
-};
+async function getAIDecision(board, coordinate) {
+  const response = await axios({
+    method: 'post',
+    url: AIUrl,
+    data: { board, coordinate },
+  });
+
+  return response.data;
+}
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     console.log('LaunchRequest');
     const attributes = handlerInput.attributesManager.getSessionAttributes();
     console.log('Attributes', attributes);
+    console.log(handlerInput.requestEnvelope.request.intent);
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
@@ -37,27 +41,11 @@ const StartGameIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'StartGameIntent';
   },
   async handle(handlerInput) {
-    const response = await axios({
-      method: 'post',
-      url: AIUrl,
-      data: {
-        board: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-        coordinate: '',
-      },
-    });
-
-    const {
-      board, newTurnCoordinate, winStatus, isFault
-    } = response.data;
-
-    console.log(`Board: ${board}, coordinates: ${newTurnCoordinate}, winStatus: ${winStatus}, isFault: ${isFault}`);
-    handlerInput.attributesManager.setSessionAttributes({ board, symbol: 'X' });
-
-    const speechText = `Ok, Google. My turn is ${LETTER_NAMES[newTurnCoordinate[0]]} ${newTurnCoordinate[1]}`;
+    const speechText = 'Ok, Google. Start Bot Battle';
 
     return handlerInput.responseBuilder
       .speak(speechText)
-      .withSimpleCard('Hello World from Bot Battle!', speechText)
+      .withSimpleCard('Ok, Google. Start Bot Battle', speechText)
       .withShouldEndSession(false)
       .getResponse();
   },
@@ -68,22 +56,47 @@ const TurnIntentHandler = {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
       && handlerInput.requestEnvelope.request.intent.name === 'TurnIntent';
   },
-  handle(handlerInput) {
-    console.log('Slots', JSON.stringify(handlerInput.requestEnvelope.request.intent.slots));
-    const turnNumber = handlerInput.requestEnvelope.request.intent.slots.turnNumber.value;
-    const turnLetter = handlerInput.requestEnvelope.request.intent.slots.turnLetter.value;
-    // add turn on board
-    // send request to AI with current board
-    // check if win
-    // find the turn and crete response
+  async handle(handlerInput) {
+    const { slots } = handlerInput.requestEnvelope.request.intent;
+    const turnNumber = (slots.turnNumber.value) ? slots.turnNumber.value : '';
+    const turnLetter = (slots.turnLetter.value) ? slots.turnLetter.resolutions.resolutionsPerAuthority[0].values[0].value.name : '';
 
-    const speechText = `Your turn is ${turnLetter}${turnNumber}`;
+    const attributes = handlerInput.attributesManager.getSessionAttributes();
+    const currentBoard = attributes.board || ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+    console.log(`Recognized values ${turnLetter}${turnNumber}`);
+    const data = await getAIDecision(currentBoard, `${turnLetter}${turnNumber}`);
+    const {
+      board, newTurnCoordinate, winStatus,
+    } = data;
+    handlerInput.attributesManager.setSessionAttributes({ board });
 
+    let speechText;
+    if (winStatus) {
+      speechText = 'I win. You lose.';
+    } else {
+      speechText = `My turn is ${newTurnCoordinate}`;
+    }
 
     return handlerInput.responseBuilder
       .speak(speechText)
       .withSimpleCard(speechText, speechText)
       .withShouldEndSession(false)
+      .getResponse();
+  },
+};
+
+const LoseIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'LoseIntent';
+  },
+  handle(handlerInput) {
+    const speechText = 'Ooooo, nooo. I will beat you next time';
+
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .withSimpleCard(speechText, speechText)
+      .withShouldEndSession(true)
       .getResponse();
   },
 };
@@ -152,6 +165,7 @@ exports.handler = skillBuilder
     LaunchRequestHandler,
     StartGameIntentHandler,
     TurnIntentHandler,
+    LoseIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     SessionEndedRequestHandler,

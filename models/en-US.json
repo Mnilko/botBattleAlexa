@@ -24,6 +24,13 @@
                   ]
               },
               {
+                "name": "LoseIntent",
+                "slots": [],
+                "samples": [
+                  "you lose"
+                ]
+              },
+              {
                   "name": "TurnIntent",
                   "slots": [
                       {
@@ -36,7 +43,8 @@
                       }
                   ],
                   "samples": [
-                      "my turn is {turnLetter} {turnNumber}"
+                      "my turn is {turnLetter} {turnNumber}",
+                      "you first"
                   ]
               }
           ],
