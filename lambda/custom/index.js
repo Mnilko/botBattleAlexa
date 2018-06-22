@@ -35,17 +35,36 @@ const LaunchRequestHandler = {
   },
 };
 
+const FallBackHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'FallBackIntent';
+  },
+  handle(handlerInput) {
+    const speechText = 'I didn\'t understand. Repeat please!';
+
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .reprompt(speechText)
+      .withSimpleCard(speechText, speechText)
+      .getResponse();
+  },
+};
+
 const StartGameIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
       && handlerInput.requestEnvelope.request.intent.name === 'StartGameIntent';
   },
   async handle(handlerInput) {
+    handlerInput.attributesManager.setSessionAttributes({
+      board: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+    });
     const speechText = 'Ok, Google. Start Bot Battle';
 
     return handlerInput.responseBuilder
       .speak(speechText)
-      .withSimpleCard('Ok, Google. Start Bot Battle', speechText)
+      .withSimpleCard(speechText, speechText)
       .withShouldEndSession(false)
       .getResponse();
   },
@@ -71,8 +90,13 @@ const TurnIntentHandler = {
     handlerInput.attributesManager.setSessionAttributes({ board });
 
     let speechText;
-    if (winStatus) {
-      speechText = 'I win. You lose.';
+    let end = false;
+
+    if (newTurnCoordinate === undefined) {
+      speechText = 'It\'s a draw bro!';
+      end = true;
+    } else if (winStatus) {
+      speechText = 'You lose.';
     } else {
       speechText = `My turn is ${newTurnCoordinate}`;
     }
@@ -80,7 +104,7 @@ const TurnIntentHandler = {
     return handlerInput.responseBuilder
       .speak(speechText)
       .withSimpleCard(speechText, speechText)
-      .withShouldEndSession(false)
+      .withShouldEndSession(end)
       .getResponse();
   },
 };
@@ -107,12 +131,12 @@ const HelpIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
   },
   handle(handlerInput) {
-    const speechText = 'You can say hello to me!';
+    const speechText = 'I didn\'t understand. Repeat please!';
 
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt(speechText)
-      .withSimpleCard('Hello World', speechText)
+      .withSimpleCard(speechText, speechText)
       .getResponse();
   },
 };
@@ -163,6 +187,7 @@ const skillBuilder = Alexa.SkillBuilders.custom();
 exports.handler = skillBuilder
   .addRequestHandlers(
     LaunchRequestHandler,
+    FallBackHandler,
     StartGameIntentHandler,
     TurnIntentHandler,
     LoseIntentHandler,

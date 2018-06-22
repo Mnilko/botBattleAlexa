@@ -16,6 +16,13 @@
                   "samples": []
               },
               {
+                "name": "FallBackIntent",
+                "slots": [],
+                "samples": [
+                    "abrakadabra"
+                ]
+              },
+              {
                   "name": "StartGameIntent",
                   "slots": [],
                   "samples": [
@@ -24,11 +31,11 @@
                   ]
               },
               {
-                "name": "LoseIntent",
-                "slots": [],
-                "samples": [
-                  "you lose"
-                ]
+                  "name": "LoseIntent",
+                  "slots": [],
+                  "samples": [
+                      "you lose"
+                  ]
               },
               {
                   "name": "TurnIntent",
