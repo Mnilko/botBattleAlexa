@@ -25,7 +25,7 @@ const LaunchRequestHandler = {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
-    const speechText = 'Welcome to the Bot Battle Skill. You can start by saying: "Start a Game"';
+    const speechText = 'Hello. You first.';
 
     return handlerInput.responseBuilder
       .speak(speechText)
@@ -60,7 +60,7 @@ const StartGameIntentHandler = {
     handlerInput.attributesManager.setSessionAttributes({
       board: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
     });
-    const speechText = 'Ok, Google. Start Bot Battle';
+    const speechText = 'Ok, Google. Talk to bot battle';
 
     return handlerInput.responseBuilder
       .speak(speechText)
@@ -87,6 +87,7 @@ const TurnIntentHandler = {
     const {
       board, newTurnCoordinate, winStatus,
     } = data;
+    console.log('BOARD TO SAVE:', board);
     handlerInput.attributesManager.setSessionAttributes({ board });
 
     let speechText;
@@ -96,7 +97,7 @@ const TurnIntentHandler = {
       speechText = 'It\'s a draw bro!';
       end = true;
     } else if (winStatus) {
-      speechText = 'You lose.';
+      speechText = `I win with ${newTurnCoordinate}. You lose.`;
     } else {
       speechText = `My turn is ${newTurnCoordinate}`;
     }
