@@ -102,6 +102,8 @@ const TurnIntentHandler = {
       speechText = `My turn is ${newTurnCoordinate}`;
     }
 
+    handlerInput.attributesManager.setSessionAttributes({ lastResponse: speechText });
+
     return handlerInput.responseBuilder
       .speak(speechText)
       .withSimpleCard(speechText, speechText)
@@ -126,6 +128,22 @@ const LoseIntentHandler = {
   },
 };
 
+const DrawIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'DrawIntent';
+  },
+  handle(handlerInput) {
+    const speechText = 'Good Game. Thanks.';
+
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .withSimpleCard(speechText, speechText)
+      .withShouldEndSession(true)
+      .getResponse();
+  },
+};
+
 const HelpIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -133,6 +151,23 @@ const HelpIntentHandler = {
   },
   handle(handlerInput) {
     const speechText = 'I didn\'t understand. Repeat please!';
+
+    return handlerInput.responseBuilder
+      .speak(speechText)
+      .reprompt(speechText)
+      .withSimpleCard(speechText, speechText)
+      .getResponse();
+  },
+};
+
+const RepeatIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'RepeatIntent';
+  },
+  handle(handlerInput) {
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    const speechText = sessionAttributes.lastResponse;
 
     return handlerInput.responseBuilder
       .speak(speechText)
@@ -191,7 +226,9 @@ exports.handler = skillBuilder
     FallBackHandler,
     StartGameIntentHandler,
     TurnIntentHandler,
+    RepeatIntentHandler,
     LoseIntentHandler,
+    DrawIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     SessionEndedRequestHandler,

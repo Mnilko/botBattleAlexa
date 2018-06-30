@@ -53,6 +53,20 @@
                       "my turn is {turnLetter} {turnNumber}",
                       "you first"
                   ]
+              },
+              {
+                "name": "RepeatIntent",
+                "samples": [
+                  "please repeat",
+                  "i didn't understand"
+                ]
+              },
+              {
+                "name": "DrawIntent",
+                "samples": [
+                  "It's a draw bro",
+                  "draw"
+                ]
               }
           ],
           "types": [
