@@ -57,8 +57,7 @@
               {
                 "name": "RepeatIntent",
                 "samples": [
-                  "please repeat",
-                  "i didn't understand"
+                  "please repeat"
                 ]
               },
               {

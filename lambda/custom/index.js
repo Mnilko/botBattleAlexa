@@ -10,7 +10,7 @@ async function getAIDecision(board, coordinate) {
   const response = await axios({
     method: 'post',
     url: AIUrl,
-    data: { board, coordinate },
+    data: { board, coordinate, isAlexa: true },
   });
 
   return response.data;
@@ -18,10 +18,9 @@ async function getAIDecision(board, coordinate) {
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
-    console.log('LaunchRequest');
     const attributes = handlerInput.attributesManager.getSessionAttributes();
     console.log('Attributes', attributes);
-    console.log(handlerInput.requestEnvelope.request.intent);
+    console.log('Intent', handlerInput.requestEnvelope.request.intent);
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
@@ -88,7 +87,6 @@ const TurnIntentHandler = {
       board, newTurnCoordinate, winStatus,
     } = data;
     console.log('BOARD TO SAVE:', board);
-    handlerInput.attributesManager.setSessionAttributes({ board });
 
     let speechText;
     let end = false;
@@ -98,14 +96,16 @@ const TurnIntentHandler = {
       end = true;
     } else if (winStatus) {
       speechText = `I win with ${newTurnCoordinate}. You lose.`;
+      end = true;
     } else {
       speechText = `My turn is ${newTurnCoordinate}`;
     }
 
-    handlerInput.attributesManager.setSessionAttributes({ lastResponse: speechText });
+    handlerInput.attributesManager.setSessionAttributes({ lastResponse: speechText, board });
 
     return handlerInput.responseBuilder
       .speak(speechText)
+      .reprompt('Please repeat')
       .withSimpleCard(speechText, speechText)
       .withShouldEndSession(end)
       .getResponse();
